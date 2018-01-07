@@ -17,7 +17,7 @@ class LRCItem(ComparableMixin):
     timestamp -> LRCTime or coercible.
     text -> unicode: text content for item.
     """
-    ITEM_PATTERN = str('[%s]%s\n')
+    ITEM_PATTERN = str('[%s]%s')
 
     def __init__(self, index=0, timestamp=None, text=''):
         try:
@@ -42,8 +42,8 @@ class LRCItem(ComparableMixin):
             return 0.0
 
     def __str__(self):
-        position = ' %s' % self.position if self.position.strip() else ''
         return self.ITEM_PATTERN % (self.timestamp, self.text)
+
     if is_py2:
         __unicode__ = __str__
 

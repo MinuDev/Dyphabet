@@ -3,13 +3,11 @@ import os
 from pathlib import Path
 
 # This class represents the whole subtitle file
-class File:
+class SubFile:
     def __init__(self, filename=None):
-        # This is a list that will later contain all the sections of the file
-        self.sections = []
-
         if filename == None:
-            raise ValueError("The filename argument cannot be None")
+            if __name__ == "__main__":
+                raise ValueError("The filename argument cannot be None")
 
         file = Path(filename)
         if not file.is_file():
@@ -25,49 +23,44 @@ class File:
         if (extension == ".srt"):
             import pysrt
             subs = pysrt.open(filename)
-            for sub in subs:
-                self.sections.append(Section(sub.start, sub.end, None, sub.text))
+            self.items = subs
         elif (extension == ".vtt"):
             import pyvtt
             subs = pyvtt.open(filename)
-            for sub in subs:
-                self.sections.append(Section(sub.start, sub.end, None, sub.text))
+            self.items = subs
         elif (extension == ".lrc"):
             import pylrc
             subs = pylrc.open(filename)
-            for sub in subs:
-                self.sections.append(Section(None, None, sub.timestamp, sub.text))
+            self.items = subs
         else:
             if (__name__ == "__main__"):
                 print("The format %s is not supported yet." % extension)
             else:
                 raise ValueError("The format %s is not supported" % extension)
 
-# This class represents a section in the file. Each section has a timestamp, text and index
-class Section:
-    def __init__(self, start=None, end=None, timestamp=None, text=None):
-        self.start = start
-        self.end = end
-        self.timestamp = timestamp
-        self.text = text
-
 # This if checks if the file is being used as a script or as a module
 if __name__ == "__main__":
     print("Welcome to pysub!\n")
     if len(sys.argv) == 2:
-        file = File(sys.argv[1])
+        file = SubFile(sys.argv[1])
         # We display this information to check if the file has been parsed succesfully
-        text = file.sections[0].text
-        start = str(file.sections[0].start)
-        end = str(file.sections[0].end)
-        timestamp = str(file.sections[0].timestamp)
-        print("The first section's text is %s" % text)
-        if start != "None":
+        text = file.items[0].text
+        print("The first section's text is \"%s\"" % text)
+        try:
+            start = file.items[0].start
             print("Its start is %s" % start)
-        if end != "None":
+        except AttributeError:
+            pass
+        try:
+            end = file.items[0].end
             print("Its end is %s" % end)
-        if timestamp != "None":
+        except AttributeError:
+            pass
+        try:
+            timestamp = file.items[0].timestamp
             print("Its timestamp is %s" % timestamp)
+        except AttributeError:
+            pass
     else:
         print("Using this script as an standalone tool is only for testing if it works correctly with your subtitle file.\nUsage: pysub.py filename")
         sys.exit(1)
