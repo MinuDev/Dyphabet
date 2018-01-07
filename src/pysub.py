@@ -27,6 +27,11 @@ class File:
             subs = pysrt.open(filename)
             for sub in subs:
                 self.sections.append(Section(sub.start.seconds, sub.end.seconds, sub.text))
+        elif (extension == ".vtt"):
+            import pyvtt
+            subs = pyvtt.open(filename)
+            for sub in subs:
+                self.sections.append(Section(sub.start.seconds, sub.end.seconds, sub.text))
         else:
             if (__name__ == "__main__"):
                 print("The format %s is not supported yet." % extension)
