@@ -1,6 +1,6 @@
-from pylrc.vtttime import LRCTime
-from pylrc.vttitem import LRCItem
-from pylrc.vttfile import LRCFile
-from pylrc.vttexc import Error, InvalidItem, InvalidTimeString
+from pylrc.lrctime import LRCTime
+from pylrc.lrcitem import LRCItem
+from pylrc.lrcfile import LRCFile
+from pylrc.lrcexc import Error, InvalidItem, InvalidTimeString
 
 open = LRCFile.open

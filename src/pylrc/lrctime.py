@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-VTT's time format parser: HH:MM:SS,mmm
+LRC's time format parser: MM:SS.mm
 """
 import re
 from datetime import time
 
-from pyvtt.vttexc import InvalidTimeString
-from pyvtt.comparablemixin import ComparableMixin
-from pyvtt.compat import str, basestring
-
+from pylrc.lrcexc import InvalidTimeString
+from pylrc.comparablemixin import ComparableMixin
+from pylrc.compat import str, basestring
 
 class TimeItemDescriptor(object):
     # pylint: disable-msg=R0903
@@ -31,29 +30,26 @@ class TimeItemDescriptor(object):
         instance.ordinal += value * self.ratio - part
 
 
-class VTTTime(ComparableMixin):
-    TIME_PATTERN = '%02d:%02d:%02d.%03d'
-    TIME_REPR = 'VTTTime(%d, %d, %d, %d)'
+class LRCTime(ComparableMixin):
+    TIME_PATTERN = '%02d:%02d.%02d'
+    TIME_REPR = 'LRCTime(%d, %d, %d)'
     RE_TIME_SEP = re.compile(r'\:|\.|\,')
     RE_INTEGER = re.compile(r'^(\d+)')
     SECONDS_RATIO = 1000
     MINUTES_RATIO = SECONDS_RATIO * 60
-    HOURS_RATIO = MINUTES_RATIO * 60
 
-    hours = TimeItemDescriptor(HOURS_RATIO)
-    minutes = TimeItemDescriptor(MINUTES_RATIO, HOURS_RATIO)
+    minutes = TimeItemDescriptor(MINUTES_RATIO)
     seconds = TimeItemDescriptor(SECONDS_RATIO, MINUTES_RATIO)
     milliseconds = TimeItemDescriptor(1, SECONDS_RATIO)
 
-    def __init__(self, hours=0, minutes=0, seconds=0, milliseconds=0):
+    def __init__(self, minutes=0, seconds=0, milliseconds=0):
         """
-        VTTTime(hours, minutes, seconds, milliseconds)
+        LRCTime(minutes, seconds, milliseconds)
 
         All arguments are optional and have a default value of 0.
         """
-        super(VTTTime, self).__init__()
-        self.ordinal = hours * self.HOURS_RATIO \
-                     + minutes * self.MINUTES_RATIO \
+        super(LRCTime, self).__init__()
+        self.ordinal = minutes * self.MINUTES_RATIO \
                      + seconds * self.SECONDS_RATIO \
                      + milliseconds
 
@@ -63,11 +59,11 @@ class VTTTime(ComparableMixin):
     def __str__(self):
         if self.ordinal < 0:
             # Represent negative times as zero
-            return str(VTTTime.from_ordinal(0))
+            return str(LRCTime.from_ordinal(0))
         return self.TIME_PATTERN % tuple(self)
 
     def _compare(self, other, method):
-        return super(VTTTime, self)._compare(self.coerce(other), method)
+        return super(LRCTime, self)._compare(self.coerce(other), method)
 
     def _cmpkey(self):
         return self.ordinal
@@ -96,7 +92,7 @@ class VTTTime(ComparableMixin):
     @classmethod
     def coerce(cls, other):
         """
-        Coerce many types to VTTTime instance.
+        Coerce many types to LRCTime instance.
         Supported types:
           - str/unicode
           - int/long
@@ -104,7 +100,7 @@ class VTTTime(ComparableMixin):
           - any iterable
           - dict
         """
-        if isinstance(other, VTTTime):
+        if isinstance(other, LRCTime):
             return other
         if isinstance(other, basestring):
             return cls.from_string(other)
@@ -118,14 +114,13 @@ class VTTTime(ComparableMixin):
             return cls(*other)
 
     def __iter__(self):
-        yield self.hours
         yield self.minutes
         yield self.seconds
         yield self.milliseconds
 
     def shift(self, *args, **kwargs):
         """
-        shift(hours, minutes, seconds, milliseconds)
+        shift(minutes, seconds, milliseconds)
 
         All arguments are optional and have a default value of 0.
         """
@@ -136,18 +131,18 @@ class VTTTime(ComparableMixin):
     @classmethod
     def from_ordinal(cls, ordinal):
         """
-        int -> VTTTime corresponding to a total count of milliseconds
+        int -> LRCTime corresponding to a total count of milliseconds
         """
         return cls(milliseconds=int(ordinal))
 
     @classmethod
     def from_string(cls, source):
         """
-        str/unicode(HH:MM:SS,mmm) -> VTTTime corresponding to serial
+        str/unicode(MM:SS.mm) -> LRCTime corresponding to serial
         raise InvalidTimeString
         """
         items = cls.RE_TIME_SEP.split(source)
-        if len(items) != 4:
+        if len(items) != 3:
             raise InvalidTimeString
         return cls(*(cls.parse_int(i) for i in items))
 
@@ -164,14 +159,14 @@ class VTTTime(ComparableMixin):
     @classmethod
     def from_time(cls, source):
         """
-        datetime.time -> VTTTime corresponding to time object
+        datetime.time -> LRCTime corresponding to time object
         """
-        return cls(hours=source.hour, minutes=source.minute,
+        return cls(minutes=source.minute,
             seconds=source.second, milliseconds=source.microsecond // 1000)
 
     def to_time(self):
         """
-        Convert VTTTime instance into a pure datetime.time object
+        Convert LRCTime instance into a pure datetime.time object
         """
-        return time(self.hours, self.minutes, self.seconds,
+        return time(0, self.minutes, self.seconds,
                     self.milliseconds * 1000)

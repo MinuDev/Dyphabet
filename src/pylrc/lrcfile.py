@@ -60,7 +60,7 @@ class LRCFile(UserList, object):
     eol = property(_get_eol, _set_eol)
 
     def shift(self, *args, **kwargs):
-        """shift(hours, minutes, seconds, milliseconds, ratio)
+        """shift(minutes, seconds, milliseconds, ratio)
 
         Shift `start` and `end` attributes of each items of file either by
         applying a ratio or by adding an offset.
@@ -152,18 +152,16 @@ class LRCFile(UserList, object):
             ...     print unicode(sub)
         """
         string_buffer = []
+        index = 0
         for line in chain(source_file, '\n'):
             if line.strip():
                 string_buffer.append(line)
-            else:
-                source = string_buffer
-                string_buffer = []
-                if source and all(source):
-                    try:
-                        yield LRCItem.from_line(source)
-                    except Error as error:
-                        error.args += (''.join(source), )
-                        cls._handle_error(error, error_handling, index)
+                try:
+                    yield LRCItem.from_line(line, index)
+                    index += 1
+                except Error as error:
+                    error.args += (''.join(line), )
+                    cls._handle_error(error, error_handling, index)
 
     def save(self, path=None, encoding=None, eol=None):
         """

@@ -26,7 +26,6 @@ class LRCItem(ComparableMixin):
             self.index = index
 
         self.timestamp = LRCTime.coerce(timestamp or 0)
-        self.position = str(position)
         self.text = str(text)
 
     @property
@@ -56,7 +55,7 @@ class LRCItem(ComparableMixin):
 
     def shift(self, *args, **kwargs):
         """
-        shift(hours, minutes, seconds, milliseconds, ratio)
+        shift(minutes, seconds, milliseconds, ratio)
 
         Add given values to the timestamp attribute.
         All arguments are optional and have a default value of 0.
@@ -68,16 +67,8 @@ class LRCItem(ComparableMixin):
         return cls.from_lines(source.splitlines(True))
 
     @classmethod
-    def from_lines(cls, lines):
-        print("processing " + str(lines))
-        if len(lines) < 2:
-            raise InvalidItem()
-        lines = [l.rstrip() for l in lines]
-        index = None
-        timestamp =
-        text = '\n'.join(lines[1:])
+    def from_line(cls, line, index):
+        line = line.rstrip()
+        match = re.match("\\[(.+)\\](.*)", line)
+        timestamp, text = match.group(1), match.group(2)
         return cls(index, timestamp, text)
-
-    @classmethod
-    def get_timestamp(cls, line):
-        

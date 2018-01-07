@@ -78,7 +78,6 @@ class VTTItem(ComparableMixin):
 
     @classmethod
     def from_lines(cls, lines):
-        print("processing " + str(lines))
         if len(lines) < 2:
             raise InvalidItem()
         lines = [l.rstrip() for l in lines]
